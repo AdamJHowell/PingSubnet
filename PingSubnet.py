@@ -13,11 +13,16 @@ Use the IP address blacklist to ignore local interfaces (e.g. "VirtualBox Host-O
 If a host does not appear in the list of online hosts, check the blacklist!
 There is a chance that the wrong interface will be selected, and the results will not be valid.
 If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces:' block.
+
+2025-02 - Switched from print() to the logging module: https://docs.python.org/3/library/logging.html
+
+ToDo: Create an IPv4 class to offload some of the work in this file.
 """
 import argparse
 import datetime
 import ipaddress
 import json
+import logging
 import platform
 import socket
 import sys
@@ -32,6 +37,39 @@ from ping3 import ping
 
 # OS detection, because Windows uses a different ping and arp arguments.
 operating_system = platform.system()
+
+
+# Custom logging formatter
+class CustomFormatter( logging.Formatter ):
+
+  def format( self, record ):
+    if record.levelno == logging.INFO:
+      return record.getMessage()
+    else:
+      return super().format( record )  # Use full format for warnings and errors
+
+
+# Create separate handlers for INFO and other levels, with different outputs.
+stdout_handler = logging.StreamHandler( sys.stdout )
+stderr_handler = logging.StreamHandler( sys.stderr )
+
+# Set log levels.
+stdout_handler.setLevel( logging.INFO )
+stderr_handler.setLevel( logging.WARNING )  # Includes WARNING, ERROR, CRITICAL.
+
+# Define different formats.
+info_format = "%(message)s"  # Simple format for info logs.
+detailed_format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
+
+# Apply formatters.
+stdout_handler.setFormatter( CustomFormatter( info_format ) )
+stderr_handler.setFormatter( CustomFormatter( detailed_format ) )
+
+# Configure logger.
+logger = logging.getLogger()
+logger.setLevel( logging.DEBUG )  # Allow all levels now, but overridden by CLA.
+logger.addHandler( stdout_handler )
+logger.addHandler( stderr_handler )
 
 
 def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
@@ -113,7 +151,7 @@ def detect_network_interfaces() -> list:
   # Get all network interfaces.
   interfaces = psutil.net_if_addrs()
   if debug:
-    print( f" Debug: {json.dumps( interfaces )}" )
+    logging.debug( f" Debug: {json.dumps( interfaces )}" )
   valid_interfaces = []
   for i_face_name, interface_addresses in interfaces.items():
     # Iterate over all address info for this interface.
@@ -153,10 +191,10 @@ def exiting( exit_code: int = 0, exit_text: str = "" ) -> NoReturn:
   :raises SystemExit: under all circumstances.
   """
   exit_timestamp = datetime.now().replace( microsecond = 0 ).isoformat( sep = " " )
-  print( "" )
+  logging.info( "" )
   if exit_text != "":
-    print( f"{exit_text}" )
-  print( f"  Exiting with code {exit_code} at {exit_timestamp}" )
+    logging.info( f"{exit_text}" )
+  logging.info( f"  Exiting with code {exit_code} at {exit_timestamp}" )
   raise SystemExit( exit_code )
 
 
@@ -176,9 +214,9 @@ def prompt_for_list_item( max_value: int ) -> int:
       if max_value > int( temp_answer ) >= 0:
         temp_number = int( temp_answer )
       else:
-        print( "  That is not a valid selection!" )
+        logging.info( "  That is not a valid selection!" )
     except ValueError:
-      print( "That is not a valid number!" )
+      logging.warning( "That is not a valid number!" )
   return temp_number
 
 
@@ -194,6 +232,10 @@ if __name__ == "__main__":
   # Parse arguments.
   args = parser.parse_args()
 
+  # Configure logging level based on the debug flag.
+  if args.debug:
+    logging.getLogger().setLevel( logging.DEBUG )
+
   # Assign values from command-line arguments.
   debug = args.debug
   timeout_ms = args.timeout_ms
@@ -204,27 +246,29 @@ if __name__ == "__main__":
   selected_index = 0
   start_time = time.perf_counter()
   current_time = datetime.now().replace( microsecond = 0 ).isoformat( sep = " " )
-  print( f"Starting {program_name} at {current_time}" )
-  print( f"Debug mode: {'ON' if debug else 'OFF'}" )
-  print( f"Timeout: {timeout_ms} ms" )
-  print( f"Pings per host: {pings_per_host}" )
+
+  logging.info( f"Starting {program_name} at {current_time}" )
+  logging.debug( f"Hostname: {hostname}" )
+  logging.info( f"Debug mode: {'ON' if debug else 'OFF'}" )
+  logging.info( f"Timeout: {timeout_ms} ms" )
+  logging.info( f"Pings per host: {pings_per_host}" )
 
   interface_list = detect_network_interfaces()
   if not interface_list:
     exiting( 2, "No viable interfaces discovered!" )
   elif len( interface_list ) > 1:
-    print()
+    logging.info( "" )
     # Print the list of network interfaces.
-    print( "Network Interfaces Detected:" )
+    logging.info( "Network Interfaces Detected:" )
     # Print all valid interfaces.
     for index, (interface_name, interface_object, _) in enumerate( interface_list ):
-      print( f"  {index} - {interface_name} - {interface_object.address}" )
+      logging.info( f"  {index} - {interface_name} - {interface_object.address}" )
     # Prompt the user for the interface to use.
     selected_index = prompt_for_list_item( len( interface_list ) )
     if debug:
-      print( f" Debug: Detailed network info: {interface_list[selected_index]}" )
+      logging.debug( f" Debug: Detailed network info: {interface_list[selected_index]}" )
   else:
-    print( f"Using the interface named '{interface_list[selected_index][0]}'" )
+    logging.info( f"Using the interface named '{interface_list[selected_index][0]}'" )
 
   # Get the selected IPv4 data and save to the global.
   selected_interface_name = interface_list[selected_index][0]
@@ -233,7 +277,7 @@ if __name__ == "__main__":
   selected_interface_mac = interface_list[selected_index][2].replace( "-", ":" )
 
   if debug:
-    print( f" Debug: {selected_interface_ipv4}/{selected_interface_netmask}" )
+    logging.debug( f" Debug: {selected_interface_ipv4}/{selected_interface_netmask}" )
   # Get the network from the IP address and subnet mask.
   v4_network = ipaddress.IPv4Network( f"{selected_interface_ipv4}/{selected_interface_netmask}", strict = False )
   # Get all hosts on the network.
@@ -246,60 +290,60 @@ if __name__ == "__main__":
     ping_count_argument = "-n"
     ping_wait_argument = "-w"
 
-  print()
-  print( "Detected properties:" )
-  print( f"  {operating_system} operating system" )
-  print( f"  interface name: {selected_interface_name}" )
-  print( f"  local hostname: {hostname}" )
-  print( f"  local IP address: {selected_interface_ipv4}" )
-  print( f"  local network mask: {selected_interface_netmask}" )
-  print( f"  local MAC address: {selected_interface_mac}" )
-  print()
-  print( f"Pinging addresses from {start_address} to {end_address}" )
+  logging.info( "" )
+  logging.info( "Detected properties:" )
+  logging.info( f"  {operating_system} operating system" )
+  logging.info( f"  interface name: {selected_interface_name}" )
+  logging.info( f"  local hostname: {hostname}" )
+  logging.info( f"  local IP address: {selected_interface_ipv4}" )
+  logging.info( f"  local network mask: {selected_interface_netmask}" )
+  logging.info( f"  local MAC address: {selected_interface_mac}" )
+  logging.info( "" )
+  logging.info( f"Pinging addresses from {start_address} to {end_address}" )
 
   try:
     online_host_list = []
     thread_list = []
     subnet_size = len( all_hosts )
     if subnet_size > 4096:
-      print( f"\n\nThere were {subnet_size} possible hosts detected." )
-      print( "This is likely an incorrectly detected subnet mask or an unused network adapter." )
-      print( "If you would like to continue, enter 1: " )
+      logging.info( f"\n\nThere were {subnet_size} possible hosts detected." )
+      logging.info( "This is likely an incorrectly detected subnet mask or an unused network adapter." )
+      logging.info( "If you would like to continue, enter 1: " )
       answer = input( "" )
       if int( answer ) != 1:
-        print( "Exiting..." )
+        logging.info( "Exiting..." )
         sys.exit( -1 )
 
     suffix = "s"
     if pings_per_host == 1:
       suffix = ""
-    print( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
+    logging.info( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
     # For each IP address in the subnet, run the ping command with subprocess.popen interface.
     for i in range( subnet_size ):
       thread_list.append( threading.Thread( target = ping3, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface_ipv4, timeout_ms) ) )
 
-    print( "Starting all threads..." )
+    logging.info( "Starting all threads..." )
     # Start all threads.
     for thread in thread_list:
       thread.start()
 
-    print( "Waiting for all threads to finish..." )
+    logging.info( "Waiting for all threads to finish..." )
     # Join all threads.
     for thread in thread_list:
       # Wait until all threads terminate using a timeout appropriate for the number of hosts.
       thread.join( timeout_ms / 1000 * pings_per_host )
 
-    print( "\nAll online host IP and MAC addresses:" )
-    print( "IP\tMAC\tHostname\tPing\tping unit" )
+    logging.info( "\nAll online host IP and MAC addresses:" )
+    logging.info( "IP\tMAC\tHostname\tPing\tping unit" )
     sorted_ip_mac = sorted( online_host_list, key = lambda x: list( map( int, x[0].split( "." ) ) ) )
     for online_host in sorted_ip_mac:
       # Note that the results are displayed out of order.
-      print( f"{online_host[0]}\t{online_host[1]}\t{online_host[3]}\t{online_host[2]:.1f}\t{ping_unit}" )
-    print( "" )
-    print( f"{len( sorted_ip_mac )} out of {subnet_size} hosts responded to a ping within {timeout_ms / 1000} seconds." )
+      logging.info( f"{online_host[0]}\t{online_host[1]}\t{online_host[3]}\t{online_host[2]:.1f}\t{ping_unit}" )
+    logging.info( "" )
+    logging.info( f"{len( sorted_ip_mac )} out of {subnet_size} hosts responded to a ping within {timeout_ms / 1000} seconds." )
+    logging.info( f"Scanning took {round( time.perf_counter() - start_time, 2 )} seconds.\n" )
 
   except KeyboardInterrupt:
-    print( "Execution interrupted." )
+    logging.warning( "Execution interrupted." )
 
-  print( f"Scanning took {round( time.perf_counter() - start_time, 2 )} seconds.\n" )
-  print( f"Goodbye from {program_name}" )
+  logging.info( f"Goodbye from {program_name}" )
