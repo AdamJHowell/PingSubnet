@@ -1,11 +1,12 @@
 # PingSubnet
+
 A Python script that will detect network adapters and ping every potential IPv4 address in the subnet.
 
-If more than one network adapter is present, it will attempt to determine if any are invalid (posessing a loopback or self-assigned address) and present the user with a list of adapters to choose from.
+If more than one network adapter is present, it will attempt to determine if any are invalid (possessing a loopback or self-assigned address) and present the user with a list of adapters to choose from.
 
 The output is printed to the screen in tab-separated format (TSV) with a header row.
 
-Example run:
+Here is a (partially sanitized) example run:
 
 ```
 Starting PingSubnet at 2025-02-14 11:55:22
@@ -44,4 +45,4 @@ Scanning took 12.22 seconds.
 Goodbye from PingSubnet
 ```
 
-In that example you will see the first two devices did not return a hostname.  I still haven't figured out why Netifaces somestimes can detect the hostname and sometimes cannot.  If anyone knows, tell me so I can update this code or update my DHCP server to better handle hostnames.
+In that example you will see the first two devices did not return a hostname.  I still haven't figured out why the socket library can sometimes detect the hostname and sometimes cannot.  If anyone knows, tell me, so I can update this code or update my DHCP server to better handle hostnames.
