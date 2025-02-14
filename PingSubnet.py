@@ -195,7 +195,7 @@ if __name__ == "__main__":
   print( f"Starting {program_name} at {current_time}" )
 
   interface_list = detect_network_interfaces()
-  if len( interface_list ) == 0:
+  if not interface_list:
     exiting( 2, "No viable interfaces discovered!" )
   elif len( interface_list ) > 1:
     print()

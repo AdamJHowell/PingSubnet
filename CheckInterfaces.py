@@ -12,6 +12,7 @@ import time
 
 import netifaces
 
+
 # https://stackoverflow.com/questions/73688089/is-there-a-way-to-select-the-correct-network-interface-using-netifaces-or-socket
 start_time = time.perf_counter()
 
@@ -28,7 +29,7 @@ for interface in interfaces:
   for i in gateways:
     print( "            <address>, <interface>, <is_default>" )
     print( f"    {i}: {gateways[i]}" )
-    print( f"      type: {type(gateways[i])}" )
+    print( f"      type: {type( gateways[i] )}" )
     for j in gateways[i]:
       print( f"      element: {gateways[i][j]}" )
       if type( gateways[i][j] ) is dict:
@@ -45,10 +46,10 @@ for interface in interfaces:
     elif address == netifaces.AF_INET:
       print( f"      ID {address} is an IPv4 interface." )
       print( f"        Info: {addresses[netifaces.AF_INET]}" )
-      asdf = addresses[netifaces.AF_INET]
+      ip_v4_address = addresses[netifaces.AF_INET]
       if ip_addr == 0:
-        ip_addr = asdf[0]['addr']
-        netmask = asdf[0]['netmask']
+        ip_addr = ip_v4_address[0]['addr']
+        netmask = ip_v4_address[0]['netmask']
     elif address == netifaces.AF_INET6:
       print( f"      ID {address} is an IPv6 interface." )
     else:
@@ -71,3 +72,6 @@ for network in subnet:
   network.hosts()
 
 print( f"\nScanning took {round( time.perf_counter() - start_time, 2 )} seconds.\n" )
+
+if __name__ == "__main__":
+  print( "This is a library, not a program." )
