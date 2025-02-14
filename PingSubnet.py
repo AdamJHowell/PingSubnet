@@ -14,7 +14,7 @@ If a host does not appear in the list of online hosts, check the blacklist!
 There is a chance that the wrong interface will be selected, and the results will not be valid.
 If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces:' block.
 """
-
+import argparse
 import datetime
 import ipaddress
 import json
@@ -184,15 +184,30 @@ def prompt_for_list_item( max_value: int ) -> int:
 
 if __name__ == "__main__":
   program_name = "PingSubnet"
-  debug = False
-  timeout_ms = 5000
-  pings_per_host = 3
+
+  # Set up ArgumentParser.
+  parser = argparse.ArgumentParser( description = f"{program_name}: A subnet pinging tool." )
+  parser.add_argument( "--debug", action = "store_true", help = "Enable debug mode." )
+  parser.add_argument( "--timeout_ms", type = int, default = 5000, help = "Ping timeout in milliseconds." )
+  parser.add_argument( "--pings_per_host", type = int, default = 3, help = "Number of pings per host." )
+
+  # Parse arguments.
+  args = parser.parse_args()
+
+  # Assign values from command-line arguments.
+  debug = args.debug
+  timeout_ms = args.timeout_ms
+  pings_per_host = args.pings_per_host
+
   ping_unit = "ms"
   hostname = socket.gethostname()
   selected_index = 0
   start_time = time.perf_counter()
   current_time = datetime.now().replace( microsecond = 0 ).isoformat( sep = " " )
   print( f"Starting {program_name} at {current_time}" )
+  print( f"Debug mode: {'ON' if debug else 'OFF'}" )
+  print( f"Timeout: {timeout_ms} ms" )
+  print( f"Pings per host: {pings_per_host}" )
 
   interface_list = detect_network_interfaces()
   if not interface_list:
