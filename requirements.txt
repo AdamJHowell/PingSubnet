@@ -1,3 +1,2 @@
-netifaces2>=0.0.22
 psutil>=6.0.0
 ping3>=4.0.8

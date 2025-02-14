@@ -31,7 +31,7 @@ import time
 from datetime import datetime
 from typing import NoReturn
 
-import psutil
+import psutil  # For OS interface detection.
 from ping3 import ping
 
 
@@ -82,8 +82,8 @@ def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   import subprocess
   import re
 
-  if ip_address == selected_interface_ipv4:
-    return selected_interface_mac.replace( "-", ":" )
+  if ip_address == selected_interface[1].address:
+    return selected_interface_mac
   # The -n option sets the timeout.
   first_option = "-n"
   if operating_system == "Windows":
@@ -202,7 +202,7 @@ def prompt_for_list_item( max_value: int ) -> int:
   """
   Prompt the user to select one element from selection_list.
 
-  :param max_value: the list of items to select from.
+  :param max_value: the number of elements to select from.
   :return: the selected list item.
   """
   temp_number = -1
@@ -271,15 +271,13 @@ if __name__ == "__main__":
     logging.info( f"Using the interface named '{interface_list[selected_index][0]}'" )
 
   # Get the selected IPv4 data and save to the global.
-  selected_interface_name = interface_list[selected_index][0]
-  selected_interface_ipv4 = interface_list[selected_index][1].address
-  selected_interface_netmask = interface_list[selected_index][1].netmask
-  selected_interface_mac = interface_list[selected_index][2].replace( "-", ":" )
+  selected_interface = interface_list[selected_index]
+  selected_interface_mac = selected_interface[2].replace( "-", ":" )
 
   if debug:
-    logging.debug( f" Debug: {selected_interface_ipv4}/{selected_interface_netmask}" )
+    logging.debug( f" Debug: {selected_interface[1].address}/{selected_interface[1].netmask}" )
   # Get the network from the IP address and subnet mask.
-  v4_network = ipaddress.IPv4Network( f"{selected_interface_ipv4}/{selected_interface_netmask}", strict = False )
+  v4_network = ipaddress.IPv4Network( f"{selected_interface[1].address}/{selected_interface[1].netmask}", strict = False )
   # Get all hosts on the network.
   all_hosts = list( v4_network.hosts() )
   start_address, end_address = get_range( v4_network )
@@ -293,10 +291,10 @@ if __name__ == "__main__":
   logging.info( "" )
   logging.info( "Detected properties:" )
   logging.info( f"  {operating_system} operating system" )
-  logging.info( f"  interface name: {selected_interface_name}" )
+  logging.info( f"  interface name: {selected_interface[0]}" )
   logging.info( f"  local hostname: {hostname}" )
-  logging.info( f"  local IP address: {selected_interface_ipv4}" )
-  logging.info( f"  local network mask: {selected_interface_netmask}" )
+  logging.info( f"  local IP address: {selected_interface[1].address}" )
+  logging.info( f"  local network mask: {selected_interface[1].netmask}" )
   logging.info( f"  local MAC address: {selected_interface_mac}" )
   logging.info( "" )
   logging.info( f"Pinging addresses from {start_address} to {end_address}" )
@@ -320,7 +318,7 @@ if __name__ == "__main__":
     logging.info( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
     # For each IP address in the subnet, run the ping command with subprocess.popen interface.
     for i in range( subnet_size ):
-      thread_list.append( threading.Thread( target = ping3, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface_ipv4, timeout_ms) ) )
+      thread_list.append( threading.Thread( target = ping3, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
 
     logging.info( "Starting all threads..." )
     # Start all threads.
