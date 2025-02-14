@@ -74,4 +74,4 @@ for network in subnet:
 print( f"\nScanning took {round( time.perf_counter() - start_time, 2 )} seconds.\n" )
 
 if __name__ == "__main__":
-  print( "This is a library, not a program." )
+  print( "" )
