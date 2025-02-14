@@ -43,3 +43,5 @@ Scanning took 12.22 seconds.
 
 Goodbye from PingSubnet
 ```
+
+In that example you will see the first two devices did not return a hostname.  I still haven't figured out why Netifaces somestimes can detect the hostname and sometimes cannot.  If anyone knows, tell me so I can update this code or update my DHCP server to better handle hostnames.
