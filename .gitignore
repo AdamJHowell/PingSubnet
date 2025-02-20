@@ -5,6 +5,11 @@
 network[vV]ariables.*
 work[nN]etwork[vV]ariables.*
 
+####################
+## JetBrains IDEs ##
+####################
+.idea/
+*.iml
 
 #################
 ## CMake files ##
@@ -12,12 +17,10 @@ work[nN]etwork[vV]ariables.*
 cmake-build-*/
 debug_custom.json
 
-
 #######################
 ## Arduino IDE files ##
 #######################
 esp*.svd
-
 
 #########################
 ## Visual Studio files ##
@@ -25,45 +28,32 @@ esp*.svd
 .vscode/
 c_cpp_properties.json
 
-
-####################
-## JetBrains IDEs ##
-####################
-.idea/
-*.iml
-
-
 ######################
 ## Windows detritus ##
 ######################
 Thumbs.db
 ehthumbs.db
 
-
 ########################
 ## Folder config file ##
 ########################
-Desktop.ini
-
+[Dd]esktop.ini
 
 #####################################
 ## Recycle Bin used on file shares ##
 #####################################
 $RECYCLE.BIN/
 
-
 #############
 # Mac crap ##
 #############
 .DS_Store
-
 
 ############
 ## Python ##
 ############
 *.py[co]
 venv/
-
 
 ##############
 ## Packages ##
@@ -77,7 +67,6 @@ var/
 sdist/
 develop-eggs/
 .installed.cfg
-
 
 ####################
 ## Installer logs ##
