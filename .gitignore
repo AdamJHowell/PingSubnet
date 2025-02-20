@@ -5,6 +5,13 @@
 network[vV]ariables.*
 work[nN]etwork[vV]ariables.*
 
+############
+## Python ##
+############
+*.py[co]
+venv/
+.venv/
+
 ####################
 ## JetBrains IDEs ##
 ####################
@@ -48,12 +55,6 @@ $RECYCLE.BIN/
 # Mac crap ##
 #############
 .DS_Store
-
-############
-## Python ##
-############
-*.py[co]
-venv/
 
 ##############
 ## Packages ##
