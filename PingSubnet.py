@@ -49,27 +49,24 @@ class CustomFormatter( logging.Formatter ):
       return super().format( record )  # Use full format for warnings and errors
 
 
-# Create separate handlers for INFO and other levels, with different outputs.
-stdout_handler = logging.StreamHandler( sys.stdout )
-stderr_handler = logging.StreamHandler( sys.stderr )
-
-# Set log levels.
-stdout_handler.setLevel( logging.INFO )
-stderr_handler.setLevel( logging.WARNING )  # Includes WARNING, ERROR, CRITICAL.
-
-# Define different formats.
-info_format = "%(message)s"  # Simple format for info logs.
-detailed_format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
-
-# Apply formatters.
-stdout_handler.setFormatter( CustomFormatter( info_format ) )
-stderr_handler.setFormatter( CustomFormatter( detailed_format ) )
-
-# Configure logger.
-logger = logging.getLogger()
-logger.setLevel( logging.DEBUG )  # Allow all levels now, but overridden by CLA.
-logger.addHandler( stdout_handler )
-logger.addHandler( stderr_handler )
+def setup_logging():
+  # Create separate handlers for INFO and other levels, with different outputs.
+  stdout_handler = logging.StreamHandler( sys.stdout )
+  stderr_handler = logging.StreamHandler( sys.stderr )
+  # Set log levels.
+  stdout_handler.setLevel( logging.INFO )
+  stderr_handler.setLevel( logging.WARNING )  # Includes WARNING, ERROR, CRITICAL.
+  # Define different formats.
+  info_format = "%(message)s"  # Simple format for info logs.
+  detailed_format = "%(asctime)s - %(levelname)s - %(funcName)s - %(message)s"
+  # Apply formatters.
+  stdout_handler.setFormatter( CustomFormatter( info_format ) )
+  stderr_handler.setFormatter( CustomFormatter( detailed_format ) )
+  # Configure logger.
+  logger = logging.getLogger()
+  logger.setLevel( logging.DEBUG )  # Allow all levels now, but overridden by CLA.
+  logger.addHandler( stdout_handler )
+  logger.addHandler( stderr_handler )
 
 
 def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
@@ -222,6 +219,7 @@ def prompt_for_list_item( max_value: int ) -> int:
 
 if __name__ == "__main__":
   program_name = "PingSubnet"
+  setup_logging()
 
   # Set up ArgumentParser.
   parser = argparse.ArgumentParser( description = f"{program_name}: A subnet pinging tool." )
