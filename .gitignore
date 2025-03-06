@@ -11,6 +11,7 @@ work[nN]etwork[vV]ariables.*
 *.py[co]
 venv/
 .venv/
+__pycache__/
 
 ####################
 ## JetBrains IDEs ##
