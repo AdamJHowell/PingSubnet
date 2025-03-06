@@ -280,12 +280,6 @@ if __name__ == "__main__":
   all_hosts = list( v4_network.hosts() )
   start_address, end_address = get_range( v4_network )
 
-  ping_count_argument = "-c"
-  ping_wait_argument = "-W"
-  if operating_system == "Windows":
-    ping_count_argument = "-n"
-    ping_wait_argument = "-w"
-
   logging.info( "" )
   logging.info( "Detected properties:" )
   logging.info( f"  {operating_system} operating system" )
