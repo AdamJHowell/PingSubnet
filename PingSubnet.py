@@ -35,12 +35,15 @@ import psutil  # For OS interface detection.
 from ping3 import ping
 
 
-# OS detection, because Windows uses a different ping and arp arguments.
+# OS detection, because Windows uses different ping and arp arguments.
 operating_system = platform.system()
 
 
-# Custom logging formatter
 class CustomFormatter( logging.Formatter ):
+  """
+  Custom formatter for logging that formats INFO messages differently from other levels.
+  """
+
 
   def format( self, record ):
     if record.levelno == logging.INFO:
@@ -49,7 +52,10 @@ class CustomFormatter( logging.Formatter ):
       return super().format( record )  # Use full format for warnings and errors
 
 
-def setup_logging():
+def setup_logging() -> None:
+  """
+  Set up the logging configuration for the application.
+  """
   # Create separate handlers for INFO and other levels, with different outputs.
   stdout_handler = logging.StreamHandler( sys.stdout )
   stderr_handler = logging.StreamHandler( sys.stderr )
@@ -106,7 +112,7 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   This function will attempt to get the hostname from the provided IP address using the arp table.
 
   :param ip_address: the IPv4 address to query for a hostname.
-  :return: the hostname.
+  :return: the hostname as a string.
   """
   try:
     new_hostname, _, _ = socket.gethostbyaddr( ip_address )
@@ -115,7 +121,7 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
     return ""
 
 
-def ping3( dest_address: str, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
+def ping_host_and_get_info( dest_address: str, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
   """
   Ping the destination address with the source address.
 
@@ -310,7 +316,7 @@ if __name__ == "__main__":
     logging.info( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
     # For each IP address in the subnet, run the ping command with subprocess.popen interface.
     for i in range( subnet_size ):
-      thread_list.append( threading.Thread( target = ping3, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
+      thread_list.append( threading.Thread( target = ping_host_and_get_info, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
 
     logging.info( "Starting all threads..." )
     # Start all threads.
