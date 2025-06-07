@@ -19,7 +19,6 @@ If that happens, disable that interface, add its IPv4 address to the blacklist, 
 ToDo: Create an IPv4 class to offload some of the work in this file.
 """
 import argparse
-import datetime
 import ipaddress
 import json
 import logging
@@ -162,7 +161,12 @@ def detect_network_interfaces() -> list:
       # Check if the address is IPv4.
       if address_info.family == socket.AF_INET:
         if not address_info.address.startswith( "127.0.0.1" ) and not address_info.address.startswith( "169.254" ):
-          valid_interfaces.append( (i_face_name, address_info, interface_addresses[0].address) )
+          mac_address = None
+          for addr_info in interface_addresses:
+            if addr_info.family == psutil.AF_LINK:  # Or socket.AF_PACKET on Linux
+              mac_address = addr_info.address
+              break
+          valid_interfaces.append( (i_face_name, address_info, mac_address) )
         break
   return valid_interfaces
 
@@ -210,7 +214,7 @@ def prompt_for_list_item( max_value: int ) -> int:
   """
   temp_number = -1
   while temp_number < 0:
-    temp_answer = input( "Enter the number to the left of your selection (or 'x' to exit): " )
+    temp_answer = input( "Enter the number to the left of your selection (or 'x' to exit): " ).strip()
     if temp_answer == "x":
       exiting( 1, "User aborted." )
     try:
@@ -229,7 +233,7 @@ if __name__ == "__main__":
 
   # Set up ArgumentParser.
   parser = argparse.ArgumentParser( description = f"{program_name}: A subnet pinging tool." )
-  parser.add_argument( "--debug", action = "store_true", help = "Enable debug mode." )
+  parser.add_argument( "--debug", action = "store_true", default = False, help = "Enable debug mode." )
   parser.add_argument( "--timeout_ms", type = int, default = 5000, help = "Ping timeout in milliseconds." )
   parser.add_argument( "--pings_per_host", type = int, default = 3, help = "Number of pings per host." )
 
@@ -304,8 +308,8 @@ if __name__ == "__main__":
     if subnet_size > 4096:
       logging.info( f"\n\nThere were {subnet_size} possible hosts detected." )
       logging.info( "This is likely an incorrectly detected subnet mask or an unused network adapter." )
-      logging.info( "If you would like to continue, enter 1: " )
-      answer = input( "" )
+      logging.info( "Enter 1 to continue, or anything else to exit: " )
+      answer = input( "" ).strip()
       if int( answer ) != 1:
         logging.info( "Exiting..." )
         sys.exit( -1 )
