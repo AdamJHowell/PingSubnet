@@ -33,7 +33,6 @@ from typing import NoReturn
 import psutil  # For OS interface detection.
 from ping3 import ping
 
-
 # OS detection, because Windows uses different ping and arp arguments.
 operating_system = platform.system()
 
@@ -43,12 +42,11 @@ class CustomFormatter( logging.Formatter ):
   Custom formatter for logging that formats INFO messages differently from other levels.
   """
 
-
   def format( self, record ):
     if record.levelno == logging.INFO:
       return record.getMessage()
     else:
-      return super().format( record )  # Use full format for warnings and errors
+      return super().format( record )  # Use the parent for warnings and errors.
 
 
 def setup_logging() -> None:
@@ -102,7 +100,7 @@ def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
     mac_with_colons = mac_binary.replace( b"-", b":" )
     return mac_with_colons.decode( "utf-8" ).upper()
   else:
-    # Handle case when no MAC address is found.
+    # Handle cases where no MAC address is found.
     return " (MAC not found) "
 
 
