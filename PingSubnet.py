@@ -15,8 +15,7 @@ There is a chance that the wrong interface will be selected, and the results wil
 If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces:' block.
 
 2025-02 - Switched from print() to the logging module: https://docs.python.org/3/library/logging.html
-
-ToDo: Create an IPv4 class to offload some of the work in this file.
+2025-07 - Added the IPv4 class to handle the network and hosts.
 """
 import argparse
 import json
