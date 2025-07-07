@@ -19,7 +19,6 @@ If that happens, disable that interface, add its IPv4 address to the blacklist, 
 ToDo: Create an IPv4 class to offload some of the work in this file.
 """
 import argparse
-import ipaddress
 import json
 import logging
 import platform
@@ -32,6 +31,8 @@ from typing import NoReturn
 
 import psutil  # For OS interface detection.
 from ping3 import ping
+
+from IPv4 import IPv4
 
 # OS detection, because Windows uses different ping and arp arguments.
 operating_system = platform.system()
@@ -282,11 +283,12 @@ if __name__ == "__main__":
 
   if debug:
     logging.debug( f" Debug: {selected_interface[1].address}/{selected_interface[1].netmask}" )
-  # Get the network from the IP address and subnet mask.
-  v4_network = ipaddress.IPv4Network( f"{selected_interface[1].address}/{selected_interface[1].netmask}", strict = False )
-  # Get all hosts on the network.
-  all_hosts = list( v4_network.hosts() )
-  start_address, end_address = get_range( v4_network )
+  # Use the IPv4 class to handle the network and hosts.
+  ipv4 = IPv4( selected_interface[1].address, selected_interface[1].netmask )
+  all_hosts = ipv4.hosts
+  start_address = ipv4.network_address
+  end_address = ipv4.broadcast_address
+  logging.info( f"Pinging addresses from {start_address} to {end_address}" )
 
   logging.info( "" )
   logging.info( "Detected properties:" )
