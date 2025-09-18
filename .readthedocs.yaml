@@ -24,7 +24,6 @@ sphinx:
   configuration: docs/conf.py
   builder: html
   fail_on_warning: true
-  source: docs/
 
 # Optionally, build your docs in additional formats such as PDF and ePub
 formats:
