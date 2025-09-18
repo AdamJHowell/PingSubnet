@@ -46,3 +46,5 @@ Goodbye from PingSubnet
 ```
 
 In that example you will see the first two devices did not return a hostname.  I still haven't figured out why the socket library can sometimes detect the hostname and sometimes cannot.  If anyone knows, tell me, so I can update this code or update my DHCP server to better handle hostnames.
+
+[![CodeFactor](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet/badge)](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet)

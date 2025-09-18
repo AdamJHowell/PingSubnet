@@ -15,12 +15,9 @@ There is a chance that the wrong interface will be selected, and the results wil
 If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces:' block.
 
 2025-02 - Switched from print() to the logging module: https://docs.python.org/3/library/logging.html
-
-ToDo: Create an IPv4 class to offload some of the work in this file.
+2025-07 - Added the IPv4 class to handle the network and hosts.
 """
 import argparse
-import datetime
-import ipaddress
 import json
 import logging
 import platform
@@ -34,22 +31,28 @@ from typing import NoReturn
 import psutil  # For OS interface detection.
 from ping3 import ping
 
+from IPv4 import IPv4
 
-# OS detection, because Windows uses a different ping and arp arguments.
+# OS detection, because Windows uses different ping and arp arguments.
 operating_system = platform.system()
 
 
-# Custom logging formatter
 class CustomFormatter( logging.Formatter ):
+  """
+  Custom formatter for logging that formats INFO messages differently from other levels.
+  """
 
   def format( self, record ):
     if record.levelno == logging.INFO:
       return record.getMessage()
     else:
-      return super().format( record )  # Use full format for warnings and errors
+      return super().format( record )  # Use the parent for warnings and errors.
 
 
-def setup_logging():
+def setup_logging() -> None:
+  """
+  Set up the logging configuration for the application.
+  """
   # Create separate handlers for INFO and other levels, with different outputs.
   stdout_handler = logging.StreamHandler( sys.stdout )
   stderr_handler = logging.StreamHandler( sys.stderr )
@@ -97,7 +100,7 @@ def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
     mac_with_colons = mac_binary.replace( b"-", b":" )
     return mac_with_colons.decode( "utf-8" ).upper()
   else:
-    # Handle case when no MAC address is found.
+    # Handle cases where no MAC address is found.
     return " (MAC not found) "
 
 
@@ -106,7 +109,7 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   This function will attempt to get the hostname from the provided IP address using the arp table.
 
   :param ip_address: the IPv4 address to query for a hostname.
-  :return: the hostname.
+  :return: the hostname as a string.
   """
   try:
     new_hostname, _, _ = socket.gethostbyaddr( ip_address )
@@ -115,7 +118,7 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
     return ""
 
 
-def ping3( dest_address: str, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
+def ping_host_and_get_info( dest_address: str, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
   """
   Ping the destination address with the source address.
 
@@ -156,7 +159,12 @@ def detect_network_interfaces() -> list:
       # Check if the address is IPv4.
       if address_info.family == socket.AF_INET:
         if not address_info.address.startswith( "127.0.0.1" ) and not address_info.address.startswith( "169.254" ):
-          valid_interfaces.append( (i_face_name, address_info, interface_addresses[0].address) )
+          mac_address = None
+          for addr_info in interface_addresses:
+            if addr_info.family == psutil.AF_LINK:  # Or socket.AF_PACKET on Linux
+              mac_address = addr_info.address
+              break
+          valid_interfaces.append( (i_face_name, address_info, mac_address) )
         break
   return valid_interfaces
 
@@ -204,7 +212,7 @@ def prompt_for_list_item( max_value: int ) -> int:
   """
   temp_number = -1
   while temp_number < 0:
-    temp_answer = input( "Enter the number to the left of your selection (or 'x' to exit): " )
+    temp_answer = input( "Enter the number to the left of your selection (or 'x' to exit): " ).strip()
     if temp_answer == "x":
       exiting( 1, "User aborted." )
     try:
@@ -223,7 +231,7 @@ if __name__ == "__main__":
 
   # Set up ArgumentParser.
   parser = argparse.ArgumentParser( description = f"{program_name}: A subnet pinging tool." )
-  parser.add_argument( "--debug", action = "store_true", help = "Enable debug mode." )
+  parser.add_argument( "--debug", action = "store_true", default = False, help = "Enable debug mode." )
   parser.add_argument( "--timeout_ms", type = int, default = 5000, help = "Ping timeout in milliseconds." )
   parser.add_argument( "--pings_per_host", type = int, default = 3, help = "Number of pings per host." )
 
@@ -274,11 +282,12 @@ if __name__ == "__main__":
 
   if debug:
     logging.debug( f" Debug: {selected_interface[1].address}/{selected_interface[1].netmask}" )
-  # Get the network from the IP address and subnet mask.
-  v4_network = ipaddress.IPv4Network( f"{selected_interface[1].address}/{selected_interface[1].netmask}", strict = False )
-  # Get all hosts on the network.
-  all_hosts = list( v4_network.hosts() )
-  start_address, end_address = get_range( v4_network )
+  # Use the IPv4 class to handle the network and hosts.
+  ipv4 = IPv4( selected_interface[1].address, selected_interface[1].netmask )
+  all_hosts = ipv4.hosts
+  start_address = ipv4.network_address
+  end_address = ipv4.broadcast_address
+  logging.info( f"Pinging addresses from {start_address} to {end_address}" )
 
   logging.info( "" )
   logging.info( "Detected properties:" )
@@ -298,8 +307,8 @@ if __name__ == "__main__":
     if subnet_size > 4096:
       logging.info( f"\n\nThere were {subnet_size} possible hosts detected." )
       logging.info( "This is likely an incorrectly detected subnet mask or an unused network adapter." )
-      logging.info( "If you would like to continue, enter 1: " )
-      answer = input( "" )
+      logging.info( "Enter 1 to continue, or anything else to exit: " )
+      answer = input( "" ).strip()
       if int( answer ) != 1:
         logging.info( "Exiting..." )
         sys.exit( -1 )
@@ -310,7 +319,7 @@ if __name__ == "__main__":
     logging.info( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
     # For each IP address in the subnet, run the ping command with subprocess.popen interface.
     for i in range( subnet_size ):
-      thread_list.append( threading.Thread( target = ping3, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
+      thread_list.append( threading.Thread( target = ping_host_and_get_info, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
 
     logging.info( "Starting all threads..." )
     # Start all threads.
