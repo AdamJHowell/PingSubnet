@@ -49,7 +49,8 @@ Here is a (partially sanitized) example run::
 
 In that example you will see the first two devices did not return a hostname.  I still haven't figured out why the socket library can sometimes detect the hostname and sometimes cannot.  If anyone knows, tell me, so I can update this code or update my DHCP server to better handle hostnames.
 
-### Documentation
+Documentation
+=============
 
 For detailed information on how to install and use this tool, please refer to the [official documentation](https://pingsubnet.readthedocs.io/en/latest/).
 
