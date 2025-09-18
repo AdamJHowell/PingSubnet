@@ -1,2 +1,4 @@
-psutil>=6.0.0
-ping3>=4.0.8
+psutil>=7.1.0
+ping3>=5.1.5
+sphinx
+sphinx-rtd-theme
