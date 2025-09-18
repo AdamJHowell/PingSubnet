@@ -12,7 +12,7 @@ An IPv4 blacklist has been added to allow the user to ignore specific interfaces
 Use the IP address blacklist to ignore local interfaces (e.g. "VirtualBox Host-Only Ethernet Adapter")
 If a host does not appear in the list of online hosts, check the blacklist!
 There is a chance that the wrong interface will be selected, and the results will not be valid.
-If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces:' block.
+If that happens, disable that interface, add its IPv4 address to the blacklist, or improve the logic in the 'for interface in interfaces' block.
 
 2025-02 - Switched from print() to the logging module: https://docs.python.org/3/library/logging.html
 2025-07 - Added the IPv4 class to handle the network and hosts.
@@ -76,8 +76,8 @@ def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   """
   This function will attempt to get the MAC address from the provided IP address using the arp table.
 
-  :param ip_address: the IPv4 address to query for a MAC address.
-  :return: the MAC address as a colon-delimited string, or None if not found.
+  :param ip_address: The IPv4 address to query for a MAC address.
+  :return: The MAC address as a colon-delimited string, or None if not found.
   """
   import subprocess
   import re
@@ -108,8 +108,8 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   """
   This function will attempt to get the hostname from the provided IP address using the arp table.
 
-  :param ip_address: the IPv4 address to query for a hostname.
-  :return: the hostname as a string.
+  :param ip_address: The IPv4 address to query for a hostname.
+  :return: The hostname as a string.
   """
   try:
     new_hostname, _, _ = socket.gethostbyaddr( ip_address )
@@ -122,11 +122,11 @@ def ping_host_and_get_info( dest_address: str, ping_count: int = 1, time_unit: s
   """
   Ping the destination address with the source address.
 
-  :param dest_address: the target IP address or hostname to ping.
-  :param ping_count: how many times to ping.
-  :param time_unit: the unit of time to ping.
-  :param src_address: the IP address to ping from.
-  :param timeout: how long to wait for a response.
+  :param dest_address: The target IP address or hostname to ping.
+  :param ping_count: How many times to ping.
+  :param time_unit: The unit of time to ping.
+  :param src_address: The IP address to ping from.
+  :param timeout: How long to wait for a response.
   The output is a tuple containing the ip address, the hostname, the ping time, and the MAC address which is stored in online_host_list.
   """
   delay_sum = 0
@@ -146,7 +146,7 @@ def detect_network_interfaces() -> list:
   Get all interfaces.
   Exclude any which have a loopback or self-assigned IP.
 
-  :return: a list of viable interfaces as tuples.
+  :return: A list of viable interfaces as tuples.
   """
   # Get all network interfaces.
   interfaces = psutil.net_if_addrs()
@@ -173,8 +173,8 @@ def get_range( network ) -> tuple:
   """
   Use the network to determine the starting and ending IP addresses.
 
-  :param network: an IPv4Network class instance.
-  :return: the network address and broadcast address as a tuple.
+  :param network: An IPv4Network class instance.
+  :return: The network address and broadcast address as a tuple.
   """
   # Calculate the network address (starting address).
   network_address = network.network_address
@@ -188,10 +188,11 @@ def get_range( network ) -> tuple:
 
 def exiting( exit_code: int = 0, exit_text: str = "" ) -> NoReturn:
   """
-  post-conditions: The program will be terminated.
+  Exit the program with a message and timestamp.
+  Post-conditions: The program will be terminated.
 
-  :param exit_code: the return value to pass to the OS.
-  :param exit_text: the text to print before exiting.
+  :param exit_code: The return value to pass to the OS.
+  :param exit_text: The text to print before exiting.
   :rtype: NoReturn
   :raises SystemExit: under all circumstances.
   """
@@ -207,8 +208,8 @@ def prompt_for_list_item( max_value: int ) -> int:
   """
   Prompt the user to select one element from selection_list.
 
-  :param max_value: the number of elements to select from.
-  :return: the selected list item.
+  :param max_value: The number of elements to select from.
+  :return: The selected list item.
   """
   temp_number = -1
   while temp_number < 0:
@@ -238,7 +239,7 @@ if __name__ == "__main__":
   # Parse arguments.
   args = parser.parse_args()
 
-  # Configure logging level based on the debug flag.
+  # Configure the logging level based on the debug flag.
   if args.debug:
     logging.getLogger().setLevel( logging.DEBUG )
 
