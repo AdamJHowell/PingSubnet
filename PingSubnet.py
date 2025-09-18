@@ -6,7 +6,7 @@ This program uses threading to ping every address on the current subnet.
 Performance: because of threading, this program can typically ping 254 addresses in under 10 seconds.
 Increasing timeout_ms or pings_per_host will increase the scan time.
 To automatically install all required packages:
-  pip install -r requirements.txt
+    pip install -r requirements.txt
 
 An IPv4 blacklist has been added to allow the user to ignore specific interfaces.
 Use the IP address blacklist to ignore local interfaces (e.g. "VirtualBox Host-Only Ethernet Adapter")
