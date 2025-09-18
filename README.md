@@ -1,5 +1,7 @@
 # PingSubnet
 
+[![Read the Docs](https://readthedocs.org/projects/pingsubnet/badge/)](https://pingsubnet.readthedocs.io/en/latest/)
+
 A Python script that will detect network adapters and ping every potential IPv4 address in the subnet.
 
 If more than one network adapter is present, it will attempt to determine if any are invalid (possessing a loopback or self-assigned address) and present the user with a list of adapters to choose from.
@@ -46,5 +48,9 @@ Goodbye from PingSubnet
 ```
 
 In that example you will see the first two devices did not return a hostname.  I still haven't figured out why the socket library can sometimes detect the hostname and sometimes cannot.  If anyone knows, tell me, so I can update this code or update my DHCP server to better handle hostnames.
+
+### Documentation
+
+For detailed information on how to install and use this tool, please refer to the [official documentation](https://pingsubnet.readthedocs.io/en/latest/).
 
 [![CodeFactor](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet/badge)](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet)
