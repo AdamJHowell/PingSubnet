@@ -231,6 +231,9 @@ def prompt_for_list_item( max_value: int ) -> int:
 
 
 def run():
+  """
+  This function is the application's entry point.
+  """
   program_name = "PingSubnet"
   setup_logging()
 
