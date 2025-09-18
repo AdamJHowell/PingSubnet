@@ -52,6 +52,9 @@ In that example you will see the first two devices did not return a hostname.  I
 Documentation
 =============
 
-For detailed information on how to install and use this tool, please refer to the [official documentation](https://pingsubnet.readthedocs.io/en/latest/).
+For detailed information on how to install and use this tool, please refer to the `official documentation`_.
 
-[![CodeFactor](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet/badge)](https://www.codefactor.io/repository/github/adamjhowell/pingsubnet)
+.. _official documentation: https://pingsubnet.readthedocs.io/en/latest/
+
+.. image:: https://www.codefactor.io/repository/github/adamjhowell/pingsubnet/badge
+   :target: https://www.codefactor.io/repository/github/adamjhowell/pingsubnet
