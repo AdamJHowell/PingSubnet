@@ -309,7 +309,6 @@ def run():
     logging.info( f"Pinging addresses from {start_address} to {end_address}" )
 
     try:
-        online_host_list = []
         online_host_queue = queue.Queue()
         thread_list = []
         subnet_size = len( all_hosts )
