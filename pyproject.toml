@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pingsubnet"
+version = "0.1.0"
+authors = [
+    { name = "Adam Howell", email = "698228+AdamJHowell@users.noreply.github.com" },
+]
+license = "MIT"
+description = "A Python script that pings all potential IPv4 addresses in a subnet and reports response times."
+readme = "README.rst"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Networking"
+]
+dependencies = [
+    "psutil",
+    "ping3"
+]
+
+[project.scripts]
+pingsubnet = "pingsubnet.main:run"

@@ -21,6 +21,7 @@ import argparse
 import json
 import logging
 import platform
+import queue
 import socket
 import sys
 import threading
@@ -82,8 +83,9 @@ def get_mac_from_ip( ip_address: str = "127.0.0.1" ) -> str:
   import subprocess
   import re
 
-  if ip_address == selected_interface[1].address:
-    return selected_interface_mac
+  # This is a shortcut for local interfaces to avoid the need to call arp against the IP address.
+  # if ip_address == selected_interface[1].address:
+  #   return selected_interface_mac
   # The -n option sets the timeout.
   first_option = "-n"
   if operating_system == "Windows":
@@ -118,11 +120,12 @@ def get_hostname_from_ip( ip_address: str = "127.0.0.1" ) -> str:
     return ""
 
 
-def ping_host_and_get_info( dest_address: str, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
+def ping_host_and_get_info( dest_address: str, online_host_list, ping_count: int = 1, time_unit: str = "ms", src_address: str = "", timeout: int = 5000 ) -> None:
   """
   Ping the destination address with the source address.
 
   :param dest_address: The target IP address or hostname to ping.
+  :param online_host_list: A Queue to store the results in.
   :param ping_count: How many times to ping.
   :param time_unit: The unit of time to ping.
   :param src_address: The IP address to ping from.
@@ -138,14 +141,15 @@ def ping_host_and_get_info( dest_address: str, ping_count: int = 1, time_unit: s
       delay_sum += delay
   if counter > 0:
     address_mac_time_tuple = dest_address, get_mac_from_ip( dest_address ), delay_sum / counter
-    online_host_list.append( address_mac_time_tuple + (get_hostname_from_ip( dest_address ),) )
+    online_host_list.put( address_mac_time_tuple + (get_hostname_from_ip( dest_address ),) )
 
 
-def detect_network_interfaces() -> list:
+def detect_network_interfaces( debug: bool ) -> list:
   """
   Get all interfaces.
   Exclude any which have a loopback or self-assigned IP.
 
+  :param debug: A flag to enable debug mode.
   :return: A list of viable interfaces as tuples.
   """
   # Get all network interfaces.
@@ -226,7 +230,7 @@ def prompt_for_list_item( max_value: int ) -> int:
   return temp_number
 
 
-if __name__ == "__main__":
+def run():
   program_name = "PingSubnet"
   setup_logging()
 
@@ -260,7 +264,7 @@ if __name__ == "__main__":
   logging.info( f"Timeout: {timeout_ms} ms" )
   logging.info( f"Pings per host: {pings_per_host}" )
 
-  interface_list = detect_network_interfaces()
+  interface_list = detect_network_interfaces( debug )
   if not interface_list:
     exiting( 2, "No viable interfaces discovered!" )
   elif len( interface_list ) > 1:
@@ -303,6 +307,7 @@ if __name__ == "__main__":
 
   try:
     online_host_list = []
+    online_host_queue = queue.Queue()
     thread_list = []
     subnet_size = len( all_hosts )
     if subnet_size > 4096:
@@ -320,7 +325,8 @@ if __name__ == "__main__":
     logging.info( f"\nThreading {subnet_size} pings, pinging each host {pings_per_host} time{suffix}, and using a timeout of {timeout_ms} milliseconds..." )
     # For each IP address in the subnet, run the ping command with subprocess.popen interface.
     for i in range( subnet_size ):
-      thread_list.append( threading.Thread( target = ping_host_and_get_info, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
+      # thread_list.append( threading.Thread( target = ping_host_and_get_info, args = (str( all_hosts[i] ), pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
+      thread_list.append( threading.Thread( target = ping_host_and_get_info, args = (str( all_hosts[i] ), online_host_queue, pings_per_host, ping_unit, selected_interface[1].address, timeout_ms) ) )
 
     logging.info( "Starting all threads..." )
     # Start all threads.
@@ -332,6 +338,11 @@ if __name__ == "__main__":
     for thread in thread_list:
       # Wait until all threads terminate using a timeout appropriate for the number of hosts.
       thread.join( timeout_ms / 1000 * pings_per_host )
+
+    # After every thread has joined.
+    online_host_list = []
+    while not online_host_queue.empty():
+      online_host_list.append( online_host_queue.get() )
 
     logging.info( "\nAll online host IP and MAC addresses:" )
     logging.info( "IP\tMAC\tHostname\tPing\tping unit" )
@@ -347,3 +358,7 @@ if __name__ == "__main__":
     logging.warning( "Execution interrupted." )
 
   logging.info( f"Goodbye from {program_name}" )
+
+
+if __name__ == "__main__":
+  run()

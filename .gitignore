@@ -9,6 +9,7 @@ work[nN]etwork[vV]ariables.*
 ## Python ##
 ############
 *.py[co]
+.pypirc
 venv/
 .venv/
 __pycache__/
