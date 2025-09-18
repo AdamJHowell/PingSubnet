@@ -8,9 +8,11 @@ A Python script that will detect network adapters and ping every potential IPv4 
 
 If more than one network adapter is present, it will attempt to determine if any are invalid (possessing a loopback or self-assigned address) and present the user with a list of adapters to choose from.
 
-The output is printed to the screen in tab-separated format (TSV) with a header row.
+The output is printed to the screen in tab-separated format (TSV) with a header row.  This makes it easy to import into a spreadsheet or database.
 
-Here is a (partially sanitized) example run::
+Here is a (partially sanitized) example run:
+
+.. code-block:: console
 
     Starting PingSubnet at 2024-12-31 23:59:59
 
