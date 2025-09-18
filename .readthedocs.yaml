@@ -14,10 +14,10 @@ build:
     # ruby: "3.4"
     # rust: "1.86"
     # golang: "1.24"
-  commands:
-    - python -m pip install -r requirements.txt
-    - cd docs
-    - sphinx-build -M html . _build
+#  commands:
+#    - python -m pip install -r requirements.txt
+#    - cd docs
+#    - sphinx-build -M html . _build
 
 python:
   install:
