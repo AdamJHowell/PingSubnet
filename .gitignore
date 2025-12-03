@@ -41,6 +41,12 @@ esp*.svd
 #########################
 .vscode/
 c_cpp_properties.json
+*.user   # Individual user settings for a Visual Studio project.
+*.suo    # Solution User Options, Visual Studio workspace settings.
+*.vspscc # Source Control Integration files.
+.vs/     # Visual Studio (2017+) directory for local solution components.
+[Bb]in/  # Output directory.
+[Oo]bj/  # Intermediate object directory.
 
 ######################
 ## Windows detritus ##
@@ -58,9 +64,9 @@ ehthumbs.db
 #####################################
 $RECYCLE.BIN/
 
-#############
-# Mac crap ##
-#############
+##########################
+# macOS Finder metadata ##
+##########################
 .DS_Store
 
 ##############
@@ -80,3 +86,46 @@ develop-eggs/
 ## Installer logs ##
 ####################
 pip-log.txt
+
+############################
+## Windows shortcut files ##
+############################
+*.lnk
+*.url
+
+##################
+## Backup files ##
+##################
+*.bak
+
+####################
+## Node.js / npm  ##
+####################
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+###########################
+## General Build & Temp  ##
+###########################
+build/
+out/
+.cache/
+log/
+temp/
+tmp/
+
+######################
+## Linux/Unix files ##
+######################
+# Core dump files
+core
+# Vim/Swap/Backup files
+[.#]*swp
+
+#######################
+## Local environment ##
+#######################
+.env
+.env.local

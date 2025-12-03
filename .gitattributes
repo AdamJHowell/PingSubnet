@@ -1,38 +1,56 @@
-## Configure all files to use LF line endings and automatically detect if files are text or not.
+## Configure all files to use LF line endings and automatically detect if files are text or not:
 * text=auto eol=lf
 
-## Explicitly configure some file extensions as text.
-*.c text
-*.h text
-*.cpp text
-*.hpp text
-*.py text
-*.ino text
-*.txt text
+## Explicitly configure some file extensions as text:
+*.c    text
+*.h    text
+*.cpp  text
+*.hpp  text
+*.py   text
+*.ino  text
+*.txt  text
 *.java text
 *.json text
 *.yaml text
 
-## Force CRLF for batch scripts.
-*.bat text eol=crlf
-*.cmd text eol=crlf
+## Force CRLF for files where Windows tooling might be broken:
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+*.sln     text eol=crlf
+*.ini     text eol=crlf
+*.inf     text eol=crlf
+*.reg     text eol=crlf
+*.log     text eol=crlf
+*.ps1     text eol=crlf
+*.psm1    text eol=crlf
+*.psd1    text eol=crlf
+*.vbs     text eol=crlf
+*.wsf     text eol=crlf
+*.sqlproj text eol=crlf
+*.csproj  text eol=crlf
+*.vcxproj text eol=crlf
+*.targets text eol=crlf
 
-## Explicitly configure specific filenames as text.
-LICENSE text
-.gitignore text
-.clang-format text
+## Explicitly configure specific filenames as text:
+.gitignore     text
+.clang-format  text
 .gitattributes text
+LICENSE        text
 
-## The binary attribute is a built-in macro for "-diff -merge -text".
-*.7z binary
-*.zip binary
-*.png binary
-*.jpg binary
-*.m4a binary
-*.mp3 binary
+## The binary attribute is a built-in macro for "-diff -merge -text":
+*.7z   binary
+*.zip  binary
+*.png  binary
+*.jpg  binary
+*.m4a  binary
+*.mp3  binary
 *.flac binary
-*.fzz binary
+*.fzz  binary
 *.fzpz binary
+*.exe  binary
+*.dll  binary
+*.obj  binary
+*.pdb  binary
 
-## Custom diff designations.
+## Custom diff designations:
 *.md text diff=markdown
