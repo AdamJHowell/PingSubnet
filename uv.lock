@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.9"
 
 [[package]]
@@ -22,8 +22,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ping3" },
-    { name = "psutil" },
+    { name = "ping3", specifier = ">=4.0.4" },
+    { name = "psutil", specifier = ">=5.9.5" },
 ]
 
 [[package]]
