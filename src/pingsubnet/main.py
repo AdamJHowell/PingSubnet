@@ -162,7 +162,7 @@ def detect_network_interfaces( debug: bool ) -> list:
         for address_info in interface_addresses:
             # Check if the address is IPv4.
             if address_info.family == socket.AF_INET:
-                if not address_info.address.startswith( "127.0.0.1" ) and not address_info.address.startswith( "169.254" ):
+                if not address_info.address.startswith( "127.0.0.1" ) and not address_info.address.startswith( "169.254" ) and address_info.address != "::1":
                     mac_address = None
                     for addr_info in interface_addresses:
                         if addr_info.family == psutil.AF_LINK:  # Or socket.AF_PACKET on Linux
